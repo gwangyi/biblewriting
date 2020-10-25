@@ -1,11 +1,305 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import axios from "axios";
+import safeEval from "notevil";
 
 Vue.use(Vuex);
 
+interface BookMeta {
+  name: string;
+  code: string;
+  chapters: number;
+}
+
+interface VersionMeta {
+  name: string;
+  code: string;
+  books: BookMeta[];
+}
+
+interface CachedBible {
+  version: string;
+  book: string;
+  chapter: number;
+  verses: string[];
+}
+
+interface BibleSelector {
+  version?: string;
+  book?: string;
+  chapter?: number;
+  verse?: number;
+}
+
 export default new Vuex.Store({
-  state: {},
-  mutations: {},
-  actions: {},
+  state: {
+    version: "",
+    book: "",
+    chapter: 1,
+    verse: 1,
+    versionMeta: [] as VersionMeta[],
+    cachedBible: [] as CachedBible[],
+    loading: false
+  },
+  mutations: {
+    loading(state, loading: boolean) {
+      state.loading = loading;
+    },
+    loadChapter(state, req: CachedBible) {
+      const [book] = state.versionMeta
+        .filter(version => version.code === req.version)
+        .map(version => version.books)
+        .flat()
+        .filter(book => book.code === req.book);
+      if (book === undefined) {
+        return;
+      }
+
+      const [bible] = state.cachedBible.filter(
+        bible =>
+          bible.version === req.version &&
+          bible.book === req.book &&
+          bible.chapter === req.chapter
+      );
+      if (bible === undefined) {
+        state.cachedBible.push(req);
+      } else {
+        bible.verses = req.verses;
+      }
+      if (state.verse > req.verses.length) {
+        state.verse = 1;
+      }
+    },
+    loadMeta(state, req: VersionMeta[]) {
+      state.versionMeta = req;
+      state.version = req[0].code;
+      state.book = req[0].books[0].code;
+      state.chapter = 1;
+      state.verse = 1;
+    },
+    select(state, selector: BibleSelector) {
+      const newSelector = {
+        version: state.version,
+        book: state.book,
+        chapter: state.chapter,
+        verse: state.verse,
+        ...selector
+      };
+      let version = state.versionMeta.find(
+        ({ code }) => code === newSelector.version
+      );
+      if (!version) {
+        newSelector.version = state.version;
+        version = state.versionMeta.find(({ code }) => code === state.version);
+        if (!version) return;
+      }
+      let book = version.books.find(({ code }) => code === newSelector.book);
+      if (!book) {
+        newSelector.book = state.book;
+        book = version.books.find(({ code }) => code === state.book);
+        if (!book) return;
+      }
+      if (newSelector.chapter <= 0 || newSelector.chapter > book.chapters) {
+        newSelector.chapter = 1;
+      }
+
+      const [maxVerses] = state.cachedBible
+        .filter(
+          ({ version, book, chapter }) =>
+            version === newSelector.version &&
+            book === newSelector.book &&
+            chapter === newSelector.chapter
+        )
+        .map(({ verses }) => verses.length);
+
+      if (
+        newSelector.verse <= 0 ||
+        (maxVerses && newSelector.verse > maxVerses)
+      ) {
+        newSelector.verse = 1;
+      }
+
+      ({
+        version: state.version,
+        book: state.book,
+        chapter: state.chapter,
+        verse: state.verse
+      } = newSelector);
+    }
+  },
+  getters: {
+    versions(state) {
+      return state.versionMeta.map(version => [version.name, version.code]);
+    },
+    versionName(state) {
+      const [name] = state.versionMeta
+        .filter(version => version.code === state.version)
+        .map(version => version.name);
+      return name || "";
+    },
+    books(state) {
+      return state.versionMeta
+        .filter(version => version.code === state.version)
+        .map(version => version.books)
+        .flat()
+        .map(book => [book.name, book.code]);
+    },
+    bookName(state) {
+      const [name] = state.versionMeta
+        .filter(version => version.code === state.version)
+        .map(version => version.books)
+        .flat()
+        .filter(book => book.code === state.book)
+        .map(book => book.name);
+      return name || "";
+    },
+    chapters(state) {
+      const [chapters] = state.versionMeta
+        .filter(version => version.code === state.version)
+        .map(version => version.books)
+        .flat()
+        .filter(book => book.code === state.book)
+        .map(book => book.chapters);
+      return chapters || 0;
+    },
+    verses(state) {
+      const [verses] = state.cachedBible
+        .filter(
+          bible =>
+            bible.version === state.version &&
+            bible.book === state.book &&
+            bible.chapter === state.chapter
+        )
+        .map(bible => bible.verses);
+      if (verses === undefined) return 0;
+      return verses.length;
+    },
+    verse(state) {
+      const [verses] = state.cachedBible
+        .filter(
+          bible =>
+            bible.version === state.version &&
+            bible.book === state.book &&
+            bible.chapter === state.chapter
+        )
+        .map(bible => bible.verses);
+      if (verses === undefined) return "";
+      return verses[state.verse - 1] || "";
+    }
+  },
+  actions: {
+    async loadMeta({ commit }) {
+      commit("loading", true);
+      try {
+        const frontPage = await axios.get(
+          "https://thingproxy.freeboard.io/fetch/https://www.bskorea.or.kr/bible/korbibReadpage.php"
+        );
+        const domparser = new DOMParser();
+        const doc = domparser.parseFromString(
+          frontPage.data,
+          frontPage.headers["content-type"].split(";")[0]
+        );
+        const versions = (Array.from(
+          doc.querySelectorAll("select#version option")
+        ) as HTMLOptionElement[]).map(option => ({
+          name: option.text,
+          code: option.value,
+          books: []
+        }));
+
+        const bibleListJs = await axios.get(
+          "https://thingproxy.freeboard.io/fetch/https://www.bskorea.or.kr/bible/js/bible.list.js"
+        );
+        const bibleMetaRaw: { code: string; books: string[][] }[] = safeEval(
+          bibleListJs.data +
+            "; [" +
+            versions
+              .map(
+                ({ code }) =>
+                  `{code: ${JSON.stringify(code)}, books: sz${code}Book}`
+              )
+              .join(", ") +
+            "]"
+        );
+
+        const buildBibleMeta: (version: string) => BookMeta[] = version => {
+          const rawBooks = bibleMetaRaw.find(({ code }) => code === version);
+          if (rawBooks === undefined) return [];
+
+          return rawBooks.books.map(([meta]) => ({
+            name: meta[0],
+            code: meta[1],
+            chapters: parseInt(meta[meta.length - 1])
+          }));
+        };
+
+        commit(
+          "loadMeta",
+          versions
+            .map(version => ({
+              ...version,
+              books: buildBibleMeta(version.code)
+            }))
+            .filter(version => version.books.length > 0)
+        );
+      } finally {
+        commit("loading", false);
+      }
+    },
+    async loadChapter({ state, commit }) {
+      commit("loading", true);
+      try {
+        const chapterPage = await axios.get(
+          "https://thingproxy.freeboard.io/fetch/https://www.bskorea.or.kr/bible/korbibReadpage.php",
+          {
+            params: {
+              version: state.version,
+              book: state.book,
+              chap: state.chapter
+            }
+          }
+        );
+        const domparser = new DOMParser();
+        const doc = domparser.parseFromString(
+          chapterPage.data,
+          chapterPage.headers["content-type"].split(";")[0]
+        );
+        const collectVerse = (node: Node): string => {
+          if (node.nodeType === Node.TEXT_NODE)
+            return ((node as Text).textContent || "").replaceAll(/\s+/g, " ");
+          if (node.nodeName === "FONT")
+            return Array.from(node.childNodes)
+              .map(n => collectVerse(n))
+              .filter(word => word)
+              .join("");
+          return "";
+        };
+        const verses = Array.from(
+          doc.querySelectorAll("div.bible_read span.number")
+        ).map(elem =>
+          elem.parentNode === null
+            ? ""
+            : Array.from(elem.parentNode.childNodes)
+                .map(node => collectVerse(node))
+                .filter(word => word)
+                .join("")
+        );
+        commit("loadChapter", {
+          version: state.version,
+          book: state.book,
+          chapter: state.chapter,
+          verses
+        });
+      } finally {
+        commit("loading", false);
+      }
+    },
+    async select({ getters, commit, dispatch }, selector: BibleSelector) {
+      commit("select", selector);
+      if (getters.verses === 0) {
+        await dispatch("loadChapter");
+      }
+    }
+  },
   modules: {}
 });
