@@ -19,6 +19,9 @@
       <BibleSelector class="screen-only" />
       <div class="container">
         <div class="content">
+          <span class="print-only">
+            {{ today }}
+          </span>
           {{ $store.getters.bookName }}
           {{ $store.state.chapter }}:{{ $store.state.verse }}
           <span class="screen-only">
@@ -62,15 +65,27 @@ import WriteBook from "./components/WriteBook.vue";
 })
 export default class App extends Vue {
   async created() {
-    await this.$store.dispatch("loadMeta");
-    await this.$store.dispatch("loadChapter");
+    try {
+      await this.$store.dispatch("loadMeta");
+      await this.$store.dispatch("loadChapter");
+    } catch (e) {
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: e.toString(),
+        position: "is-bottom",
+        type: "is-danger"
+      });
+    }
   }
 
   get isLoading() {
     return this.$store.state.loading;
   }
 
+  private today = "";
+
   private print() {
+    this.today = new Date().toLocaleDateString();
     window.print();
   }
 }
@@ -79,6 +94,11 @@ export default class App extends Vue {
 <style>
 @media print {
   .screen-only {
+    display: none !important;
+  }
+}
+@media screen {
+  .print-only {
     display: none !important;
   }
 }

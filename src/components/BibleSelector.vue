@@ -62,7 +62,18 @@ export default class BibleSelector extends Vue {
   }
 
   set version(version) {
-    this.$store.dispatch("select", { version });
+    (async () => {
+      try {
+        await this.$store.dispatch("select", { version });
+      } catch (e) {
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: e.toString(),
+          position: "is-bottom",
+          type: "is-danger"
+        });
+      }
+    })();
   }
 
   private book = "";
@@ -73,12 +84,21 @@ export default class BibleSelector extends Vue {
   }
 
   @Watch("book")
-  private onBook() {
+  private async onBook() {
     const book = (this.$store.getters.books as CodeMapEntry[]).find(
       ({ name }) => name === this.book
     );
     if (book && this.$store.state.book !== book.code) {
-      this.$store.dispatch("select", { book: book.code });
+      try {
+        await this.$store.dispatch("select", { book: book.code });
+      } catch (e) {
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: e.toString(),
+          position: "is-bottom",
+          type: "is-danger"
+        });
+      }
     }
   }
 
@@ -91,9 +111,18 @@ export default class BibleSelector extends Vue {
   }
 
   @debounce(200)
-  private setchapter(chapter: number) {
+  private async setchapter(chapter: number) {
     if (this.chapter !== chapter) {
-      this.$store.dispatch("select", { chapter });
+      try {
+        await this.$store.dispatch("select", { chapter });
+      } catch (e) {
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: e.toString(),
+          position: "is-bottom",
+          type: "is-danger"
+        });
+      }
     }
   }
 
@@ -106,9 +135,18 @@ export default class BibleSelector extends Vue {
   }
 
   @debounce(200)
-  private setverse(verse: number) {
+  private async setverse(verse: number) {
     if (this.verse !== verse) {
-      this.$store.dispatch("select", { verse });
+      try {
+        await this.$store.dispatch("select", { verse });
+      } catch (e) {
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: e.toString(),
+          position: "is-bottom",
+          type: "is-danger"
+        });
+      }
     }
   }
 
