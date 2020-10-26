@@ -200,7 +200,7 @@ export default new Vuex.Store({
       commit("loading", true);
       try {
         const frontPage = await axios.get(
-          "https://thingproxy.freeboard.io/fetch/https://www.bskorea.or.kr/bible/korbibReadpage.php"
+          "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible/korbibReadpage.php"
         );
         const domparser = new DOMParser();
         const doc = domparser.parseFromString(
@@ -216,7 +216,7 @@ export default new Vuex.Store({
         }));
 
         const bibleListJs = await axios.get(
-          "https://thingproxy.freeboard.io/fetch/https://www.bskorea.or.kr/bible/js/bible.list.js"
+          "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible/js/bible.list.js"
         );
         const bibleMetaRaw: { code: string; books: string[][] }[] = safeEval(
           bibleListJs.data +
@@ -258,7 +258,7 @@ export default new Vuex.Store({
       commit("loading", true);
       try {
         const chapterPage = await axios.get(
-          "https://thingproxy.freeboard.io/fetch/https://www.bskorea.or.kr/bible/korbibReadpage.php",
+          "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible/korbibReadpage.php",
           {
             params: {
               version: state.version,

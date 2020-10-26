@@ -26,9 +26,9 @@
           </span>
         </div>
         <b-field class="screen-only">
-          <b-button type="is-primary" icon="printer" expanded @click="print"
-            >Print</b-button
-          >
+          <b-button type="is-primary" icon="printer" expanded @click="print">
+            Print
+          </b-button>
         </b-field>
 
         <WriteBook class="grey" />
