@@ -5,6 +5,11 @@ import safeEval from "notevil";
 
 Vue.use(Vuex);
 
+export interface CodeMapEntry {
+  name: string;
+  code: string;
+}
+
 interface BookMeta {
   name: string;
   code: string;
@@ -129,7 +134,10 @@ export default new Vuex.Store({
   },
   getters: {
     versions(state) {
-      return state.versionMeta.map(version => [version.name, version.code]);
+      return state.versionMeta.map(version => ({
+        name: version.name,
+        code: version.code
+      }));
     },
     versionName(state) {
       const [name] = state.versionMeta
@@ -142,7 +150,7 @@ export default new Vuex.Store({
         .filter(version => version.code === state.version)
         .map(version => version.books)
         .flat()
-        .map(book => [book.name, book.code]);
+        .map(book => ({ name: book.name, code: book.code }));
     },
     bookName(state) {
       const [name] = state.versionMeta

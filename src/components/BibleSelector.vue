@@ -5,10 +5,10 @@
         <b-select v-model="version" rounded expanded icon="translate">
           <option
             v-for="version in versions"
-            :value="version[1]"
-            :key="version[1]"
+            :value="version.code"
+            :key="version.code"
           >
-            {{ version[0] }}
+            {{ version.name }}
           </option>
         </b-select>
       </b-field>
@@ -49,6 +49,7 @@
 <script lang="ts">
 import { Component, Watch, Vue } from "vue-property-decorator";
 import { debounce } from "typescript-debounce-decorator";
+import { CodeMapEntry } from "@/store/index";
 
 @Component
 export default class BibleSelector extends Vue {
@@ -73,11 +74,11 @@ export default class BibleSelector extends Vue {
 
   @Watch("book")
   private onBook() {
-    const bookPair = this.$store.getters.books.find(
-      ([name]) => name === this.book
+    const book = (this.$store.getters.books as CodeMapEntry[]).find(
+      ({ name }) => name === this.book
     );
-    if (bookPair && this.$store.state.book !== bookPair[1]) {
-      this.$store.dispatch("select", { book: bookPair[1] });
+    if (book && this.$store.state.book !== book.code) {
+      this.$store.dispatch("select", { book: book.code });
     }
   }
 
@@ -90,7 +91,7 @@ export default class BibleSelector extends Vue {
   }
 
   @debounce(200)
-  private setchapter(chapter) {
+  private setchapter(chapter: number) {
     if (this.chapter !== chapter) {
       this.$store.dispatch("select", { chapter });
     }
@@ -105,7 +106,7 @@ export default class BibleSelector extends Vue {
   }
 
   @debounce(200)
-  private setverse(verse) {
+  private setverse(verse: number) {
     if (this.verse !== verse) {
       this.$store.dispatch("select", { verse });
     }
@@ -116,9 +117,11 @@ export default class BibleSelector extends Vue {
   }
 
   get bookNames() {
-    return this.$store.getters.books
-      .map(([name]) => name)
-      .filter(name => name.toLowerCase().includes(this.book.toLowerCase()));
+    return (this.$store.getters.books as CodeMapEntry[])
+      .map(({ name }) => name)
+      .filter((name: string) =>
+        name.toLowerCase().includes(this.book.toLowerCase())
+      );
   }
 
   get chapters() {
