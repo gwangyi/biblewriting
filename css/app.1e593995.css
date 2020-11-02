@@ -1,0 +1,3 @@
+svg.cell text[data-v-0f533038]{font-family:Nanum Gothic;font-weight:700;font-size:8px}.grey text[data-v-0f533038]{fill:#ccc}.transparent text[data-v-0f533038]{fill:transparent}@import (
+  "https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@700&display=swap"
+);.page[data-v-4294f940]{display:flex;flex-direction:column;margin:1em 0}.row[data-v-4294f940]{display:flex;flex-direction:row}.cell[data-v-4294f940]{flex:1;height:auto;border:1px solid #000;margin:-.5px}@media print{.screen-only{display:none!important}.section{padding:1em!important}}@media screen{.print-only{display:none!important}}.copyright{font-size:.8rem}
