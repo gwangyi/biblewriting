@@ -11,6 +11,8 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 
+const within = (n: number, min: number, max: number) => n >= min && n < max;
+
 @Component({})
 export default class WriteBook extends Vue {
   get verse() {
@@ -19,20 +21,48 @@ export default class WriteBook extends Vue {
 
   get page() {
     const page = [];
-    for (let i = 0; i < this.verse.length; i += this.glyphPerRow) {
+    let i = 0;
+    while (i < this.verse.length) {
+      const row = [];
       while (this.verse[i] === " " && i < this.verse.length) ++i;
       if (i >= this.verse.length) break;
-      page.push(
-        Array.from(Array(this.glyphPerRow).keys()).map(
-          idx => this.verse[idx + i] || ""
-        )
-      );
+
+      let j = 0,
+        k = 0;
+      while (k < this.glyphPerRow && i + k < this.verse.length) {
+        if (this.verse[i + j] == "\n") {
+          j += 1;
+          break;
+        } else if (
+          within(this.verse.charCodeAt(i + j), 32, 256) &&
+          within(this.verse.charCodeAt(i + j + 1), 32, 256)
+        ) {
+          row.push(this.verse[i + j] + this.verse[i + j + 1]);
+          j += 2;
+        } else {
+          row.push(this.verse[i + j]);
+          j += 1;
+        }
+        ++k;
+      }
+      if (row.length > 0) {
+        while (k < this.glyphPerRow) {
+          row.push("");
+          ++k;
+        }
+        page.push(row);
+      }
+      i += j;
     }
     return page;
   }
 
   get glyphPerRow() {
-    return Math.max(Math.ceil(Math.sqrt(this.verse.length / 0.7) + 1), 10);
+    return Math.max(
+      Math.ceil(Math.sqrt(this.verse.length / 0.7) + 1) +
+        Math.ceil((this.verse.match(/\n/g) || []).length * 0.35),
+      10
+    );
   }
 }
 </script>

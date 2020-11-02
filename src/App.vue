@@ -86,7 +86,7 @@ export default class App extends Vue {
 
   private print() {
     this.today = new Date().toLocaleDateString();
-    window.print();
+    this.$nextTick(() => window.print());
   }
 }
 </script>
