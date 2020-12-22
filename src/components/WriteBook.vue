@@ -3,6 +3,22 @@
     <div v-for="(row, i) in page" :key="i" class="row">
       <svg v-for="(cell, i) in row" :key="i" class="cell" viewBox="0 0 10 10">
         <text x="50%" y="50%">{{ cell }}</text>
+        <line
+          x1="0"
+          y1="5"
+          x2="10"
+          y2="5"
+          style="stroke:rgb(192,192,192);stroke-width:1px"
+          vector-effect="non-scaling-stroke"
+        />
+        <line
+          x1="5"
+          y1="0"
+          x2="5"
+          y2="10"
+          style="stroke:rgb(192,192,192);stroke-width:1px"
+          vector-effect="non-scaling-stroke"
+        />
       </svg>
     </div>
   </div>
@@ -88,12 +104,6 @@ export default class WriteBook extends Vue {
   height: auto;
   border: 1px solid black;
   margin: -0.5px;
-}
-
-.cell:before {
-  content: "";
-  float: left;
-  padding-top: 100%;
 }
 
 svg.cell text {
