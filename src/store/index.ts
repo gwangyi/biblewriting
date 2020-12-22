@@ -5,6 +5,10 @@ import safeEval from "notevil";
 
 Vue.use(Vuex);
 
+const DEFAULT_BIBLE_BASE =
+  "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible";
+const bibleBase = process.env.VUE_APP_BIBLE_BASE || DEFAULT_BIBLE_BASE;
+
 export interface CodeMapEntry {
   name: string;
   code: string;
@@ -199,9 +203,7 @@ export default new Vuex.Store({
     async loadMeta({ commit }) {
       commit("loading", true);
       try {
-        const frontPage = await axios.get(
-          "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible/korbibReadpage.php"
-        );
+        const frontPage = await axios.get(bibleBase + "/korbibReadpage.php");
         const domparser = new DOMParser();
         const doc = domparser.parseFromString(
           frontPage.data,
@@ -215,9 +217,7 @@ export default new Vuex.Store({
           books: []
         }));
 
-        const bibleListJs = await axios.get(
-          "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible/js/bible.list.js"
-        );
+        const bibleListJs = await axios.get(bibleBase + "/js/bible.list.js");
         const bibleMetaRaw: { code: string; books: string[][] }[] = safeEval(
           bibleListJs.data +
             "; [" +
@@ -257,16 +257,13 @@ export default new Vuex.Store({
     async loadChapter({ state, commit }) {
       commit("loading", true);
       try {
-        const chapterPage = await axios.get(
-          "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible/korbibReadpage.php",
-          {
-            params: {
-              version: state.version,
-              book: state.book,
-              chap: state.chapter
-            }
+        const chapterPage = await axios.get(bibleBase + "/korbibReadpage.php", {
+          params: {
+            version: state.version,
+            book: state.book,
+            chap: state.chapter
           }
-        );
+        });
         const domparser = new DOMParser();
         const doc = domparser.parseFromString(
           chapterPage.data,
