@@ -40,12 +40,21 @@ interface BibleSelector {
   verse?: number;
 }
 
+interface BibleRangeSelector {
+  version?: string;
+  book?: string;
+  chapter?: number;
+  verseStart?: number;
+  verseEnd?: number;
+}
+
 export default new Vuex.Store({
   state: {
     version: "",
     book: "",
     chapter: 1,
-    verse: 1,
+    verseStart: 1,
+    verseEnd: 1,
     versionMeta: [] as VersionMeta[],
     cachedBible: [] as CachedBible[],
     loading: false
@@ -75,8 +84,11 @@ export default new Vuex.Store({
       } else {
         bible.verses = req.verses;
       }
-      if (state.verse > req.verses.length) {
-        state.verse = 1;
+      if (state.verseStart > req.verses.length) {
+        state.verseStart = 1;
+      }
+      if (state.verseEnd > req.verses.length) {
+        state.verseEnd = 1;
       }
     },
     loadMeta(state, req: VersionMeta[]) {
@@ -84,14 +96,16 @@ export default new Vuex.Store({
       state.version = req[0].code;
       state.book = req[0].books[0].code;
       state.chapter = 1;
-      state.verse = 1;
+      state.verseStart = 1;
+      state.verseEnd = 1;
     },
-    select(state, selector: BibleSelector) {
+    select(state, selector: BibleRangeSelector) {
       const newSelector = {
         version: state.version,
         book: state.book,
         chapter: state.chapter,
-        verse: state.verse,
+        verseStart: state.verseStart,
+        verseEnd: state.verseEnd,
         ...selector
       };
       let version = state.versionMeta.find(
@@ -122,17 +136,24 @@ export default new Vuex.Store({
         .map(({ verses }) => verses.length);
 
       if (
-        newSelector.verse <= 0 ||
-        (maxVerses && newSelector.verse > maxVerses)
+        newSelector.verseStart <= 0 ||
+        (maxVerses && newSelector.verseStart > maxVerses)
       ) {
-        newSelector.verse = 1;
+        newSelector.verseStart = 1;
+      }
+      if (
+        newSelector.verseEnd <= 0 ||
+        (maxVerses && newSelector.verseEnd > maxVerses)
+      ) {
+        newSelector.verseEnd = 1;
       }
 
       ({
         version: state.version,
         book: state.book,
         chapter: state.chapter,
-        verse: state.verse
+        verseStart: state.verseStart,
+        verseEnd: state.verseEnd
       } = newSelector);
     }
   },
@@ -196,7 +217,10 @@ export default new Vuex.Store({
         )
         .map(bible => bible.verses);
       if (verses === undefined) return "";
-      return verses[state.verse - 1] || "";
+      return Object.keys([...Array(state.verseEnd - state.verseStart + 1)])
+        .map(v => parseInt(v) + state.verseStart)
+        .map(v => verses[v - 1])
+        .join(" ");
     }
   },
   actions: {
@@ -300,6 +324,19 @@ export default new Vuex.Store({
       }
     },
     async select({ getters, commit, dispatch }, selector: BibleSelector) {
+      const { verse, ...restSelector } = selector;
+      const rangedSelector: BibleRangeSelector = restSelector;
+      rangedSelector.verseStart = verse;
+      rangedSelector.verseEnd = verse;
+      commit("select", rangedSelector);
+      if (getters.verses === 0) {
+        await dispatch("loadChapter");
+      }
+    },
+    async selectRange(
+      { getters, commit, dispatch },
+      selector: BibleRangeSelector
+    ) {
       commit("select", selector);
       if (getters.verses === 0) {
         await dispatch("loadChapter");

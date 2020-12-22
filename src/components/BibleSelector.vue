@@ -42,6 +42,11 @@
           :custom-formatter="val => (val ? val.toString() : '')"
         ></b-slider>
       </b-field>
+      <b-field>
+        <b-checkbox v-model="ranged">
+          여러 절 보기
+        </b-checkbox>
+      </b-field>
     </section>
   </div>
 </template>
@@ -77,6 +82,7 @@ export default class BibleSelector extends Vue {
   }
 
   private book = "";
+  private ranged = false;
 
   @Watch("$store.getters.bookName")
   private onBookName() {
@@ -126,19 +132,46 @@ export default class BibleSelector extends Vue {
     }
   }
 
+  get singleVerse() {
+    return this.$store.state.verseStart || 1;
+  }
+
+  set singleVerse(verse) {
+    this.setverse(verse, verse);
+  }
+
+  get multiVerse() {
+    const start = this.$store.state.verseStart || 1;
+    const end = this.$store.state.verseEnd || 1;
+    return [start, end];
+  }
+
+  set multiVerse(verse) {
+    if (verse.length === 2) {
+      this.setverse(verse[0], verse[1]);
+    }
+  }
+
   get verse() {
-    return this.$store.state.verse || 1;
+    if (this.ranged) {
+      return this.multiVerse;
+    }
+    return this.singleVerse;
   }
 
   set verse(verse) {
-    this.setverse(verse);
+    if (this.ranged) {
+      this.multiVerse = verse;
+    } else {
+      this.singleVerse = verse;
+    }
   }
 
   @debounce(200)
-  private async setverse(verse: number) {
-    if (this.verse !== verse) {
+  private async setverse(verseStart: number, verseEnd: number) {
+    if (this.multiVerse[0] !== verseStart || this.multiVerse[1] !== verseEnd) {
       try {
-        await this.$store.dispatch("select", { verse });
+        await this.$store.dispatch("selectRange", { verseStart, verseEnd });
       } catch (e) {
         this.$buefy.toast.open({
           duration: 5000,

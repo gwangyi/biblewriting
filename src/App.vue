@@ -23,7 +23,7 @@
             {{ today }}
           </span>
           {{ $store.getters.bookName }}
-          {{ $store.state.chapter }}:{{ $store.state.verse }}
+          {{ $store.state.chapter }}:{{ verseNumber }}
           <span class="screen-only">
             {{ $store.getters.verse }}
           </span>
@@ -80,6 +80,13 @@ export default class App extends Vue {
 
   get isLoading() {
     return this.$store.state.loading;
+  }
+
+  get verseNumber() {
+    if (this.$store.state.verseStart === this.$store.state.verseEnd) {
+      return this.$store.state.verseStart;
+    }
+    return `${this.$store.state.verseStart}-${this.$store.state.verseEnd}`;
   }
 
   private today = "";
