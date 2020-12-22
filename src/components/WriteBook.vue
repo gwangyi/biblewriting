@@ -38,6 +38,7 @@ export default class WriteBook extends Vue {
   get page() {
     const page = [];
     let i = 0;
+    let first = true;
     while (i < this.verse.length) {
       const row = [];
       while (this.verse[i] === " " && i < this.verse.length) ++i;
@@ -45,9 +46,17 @@ export default class WriteBook extends Vue {
 
       let j = 0,
         k = 0;
+
+      if (first) {
+        k += 1;
+        row.push("");
+      }
+      first = false;
+
       while (k < this.glyphPerRow && i + k < this.verse.length) {
         if (this.verse[i + j] == "\n") {
           j += 1;
+          first = true;
           break;
         } else if (
           within(this.verse.charCodeAt(i + j), 32, 256) &&
