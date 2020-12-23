@@ -120,7 +120,7 @@ export default class BibleSelector extends Vue {
   private async setchapter(chapter: number) {
     if (this.chapter !== chapter) {
       try {
-        await this.$store.dispatch("select", { chapter });
+        await this.$store.dispatch("selectRange", { chapter });
       } catch (e) {
         this.$buefy.toast.open({
           duration: 5000,

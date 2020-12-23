@@ -326,8 +326,10 @@ export default new Vuex.Store({
     async select({ getters, commit, dispatch }, selector: BibleSelector) {
       const { verse, ...restSelector } = selector;
       const rangedSelector: BibleRangeSelector = restSelector;
-      rangedSelector.verseStart = verse;
-      rangedSelector.verseEnd = verse;
+      if (verse) {
+        rangedSelector.verseStart = verse;
+        rangedSelector.verseEnd = verse;
+      }
       commit("select", rangedSelector);
       if (getters.verses === 0) {
         await dispatch("loadChapter");
