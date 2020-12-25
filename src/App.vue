@@ -103,6 +103,9 @@ export default class App extends Vue {
   .screen-only {
     display: none !important;
   }
+  .section {
+    padding: 1em !important;
+  }
 }
 @media screen {
   .print-only {

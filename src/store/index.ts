@@ -219,7 +219,7 @@ export default new Vuex.Store({
       if (verses === undefined) return "";
       return Object.keys([...Array(state.verseEnd - state.verseStart + 1)])
         .map(v => parseInt(v) + state.verseStart)
-        .map(v => verses[v - 1])
+        .map(v => verses[v - 1].trim())
         .join(" ");
     }
   },
