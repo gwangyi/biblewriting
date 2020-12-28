@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import WriteCell from "./WriteCell.vue";
 
 const within = (n: number, min: number, max: number) => n >= min && n < max;
@@ -18,6 +18,18 @@ const within = (n: number, min: number, max: number) => n >= min && n < max;
 export default class WriteBook extends Vue {
   @Prop({ default: "" })
   private type!: string;
+
+  private glyphPerRow = 10;
+
+  @Watch("verse")
+  private adjustGlyphsPerRow() {
+    this.glyphPerRow = Math.max(
+      Math.ceil(Math.sqrt(this.verse.length / 0.7) + 1),
+      10
+    );
+
+    while (this.page.length > this.glyphPerRow * 0.7) this.glyphPerRow += 1;
+  }
 
   get verse() {
     return this.$store.getters.verse;
@@ -74,14 +86,6 @@ export default class WriteBook extends Vue {
       i += j;
     }
     return page;
-  }
-
-  get glyphPerRow() {
-    return Math.max(
-      Math.ceil(Math.sqrt(this.verse.length / 0.7) + 1) +
-        Math.ceil((this.verse.match(/\n/g) || []).length * 0.35),
-      10
-    );
   }
 }
 </script>
