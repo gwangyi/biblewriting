@@ -116,7 +116,7 @@ export default class BibleSelector extends Vue {
     this.setchapter(chapter);
   }
 
-  @debounce(200)
+  @debounce(500)
   private async setchapter(chapter: number) {
     if (this.chapter !== chapter) {
       try {
