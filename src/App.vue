@@ -34,8 +34,8 @@
           </b-button>
         </b-field>
 
-        <WriteBook class="grey" />
-        <WriteBook class="transparent" />
+        <WriteBook type="grey" />
+        <WriteBook type="transparent" />
 
         <span class="copyright screen-only">
           Icons made by

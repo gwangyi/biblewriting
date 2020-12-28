@@ -1,36 +1,24 @@
 <template>
   <div class="page container">
     <div v-for="(row, i) in page" :key="i" class="row">
-      <svg v-for="(cell, i) in row" :key="i" class="cell" viewBox="0 0 10 10">
-        <text x="50%" y="50%">{{ cell }}</text>
-        <line
-          x1="0"
-          y1="5"
-          x2="10"
-          y2="5"
-          style="stroke:rgb(192,192,192);stroke-width:1px"
-          vector-effect="non-scaling-stroke"
-        />
-        <line
-          x1="5"
-          y1="0"
-          x2="5"
-          y2="10"
-          style="stroke:rgb(192,192,192);stroke-width:1px"
-          vector-effect="non-scaling-stroke"
-        />
-      </svg>
+      <WriteCell v-for="(cell, i) in row" :key="i" :cell="cell" :type="type" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop } from "vue-property-decorator";
+import WriteCell from "./WriteCell.vue";
 
 const within = (n: number, min: number, max: number) => n >= min && n < max;
 
-@Component({})
+@Component({
+  components: { WriteCell }
+})
 export default class WriteBook extends Vue {
+  @Prop({ default: "" })
+  private type!: string;
+
   get verse() {
     return this.$store.getters.verse;
   }
@@ -70,10 +58,16 @@ export default class WriteBook extends Vue {
         }
         ++k;
       }
+      if (
+        row.length === this.glyphPerRow &&
+        [".", ",", '"', "'"].includes(this.verse[i + j])
+      ) {
+        row[row.length - 1] += this.verse[i + j];
+        j += 1;
+      }
       if (row.length > 0) {
-        while (k < this.glyphPerRow) {
+        while (row.length < this.glyphPerRow) {
           row.push("");
-          ++k;
         }
         page.push(row);
       }
@@ -113,21 +107,5 @@ export default class WriteBook extends Vue {
   height: auto;
   border: 1px solid black;
   margin: -0.5px;
-}
-
-svg.cell text {
-  font-family: "Nanum Gothic";
-  font-weight: 700;
-  font-size: 9px;
-  text-anchor: middle;
-  dominant-baseline: central;
-}
-
-.grey text {
-  fill: #ccc;
-}
-
-.transparent text {
-  fill: transparent;
 }
 </style>
