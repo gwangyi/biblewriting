@@ -23,12 +23,26 @@ export default class WriteBook extends Vue {
 
   @Watch("verse")
   private adjustGlyphsPerRow() {
-    this.glyphPerRow = Math.max(
-      Math.ceil(Math.sqrt(this.verse.length / 0.7) + 1),
-      10
-    );
+    let min = 10,
+      max = this.verse.length;
+    let diff = 0;
+    this.glyphPerRow = 10;
 
-    while (this.page.length > this.glyphPerRow * 0.7) this.glyphPerRow += 1;
+    while (min < max) {
+      this.glyphPerRow = Math.floor((min + max) / 2);
+      if (min === this.glyphPerRow) break;
+      diff = this.page.length - this.glyphPerRow * 0.7;
+      if (diff > 0) {
+        min = this.glyphPerRow;
+      } else if (diff < 0) {
+        max = this.glyphPerRow;
+      } else {
+        break;
+      }
+    }
+
+    if (diff > 0) this.glyphPerRow += 1;
+    if (this.glyphPerRow < 10) this.glyphPerRow = 10;
   }
 
   get verse() {
