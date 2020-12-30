@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/biblewriting/precache-manifest.ab1410f72a7ccea0af3a945b4c85151b.js"
+  "/biblewriting/precache-manifest.35b0a5d9e9a67819e51f0bcc340b8cc3.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "biblewriting"});

@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "c002c79f9bdbdfe7784f",
+    "revision": "eaeb9638dfb4259d4b8f",
     "url": "/biblewriting/css/app.1e593995.css"
   },
   {
@@ -12,12 +12,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/biblewriting/img/logo.199b774b.png"
   },
   {
-    "revision": "58303b85a2fa0053f1641f5d820738ad",
+    "revision": "76c8b16028e83c3a25cb29f3b82b3b16",
     "url": "/biblewriting/index.html"
   },
   {
-    "revision": "c002c79f9bdbdfe7784f",
-    "url": "/biblewriting/js/app.6017c166.js"
+    "revision": "eaeb9638dfb4259d4b8f",
+    "url": "/biblewriting/js/app.3b31b26d.js"
   },
   {
     "revision": "d7a85301a3cfbe3515e4",
