@@ -67,7 +67,7 @@ export default class WriteBook extends Vue {
       }
       first = false;
 
-      while (k < this.glyphPerRow && i + k < this.verse.length) {
+      while (k < this.glyphPerRow && i + j < this.verse.length) {
         if (this.verse[i + j] == "\n") {
           j += 1;
           first = true;
