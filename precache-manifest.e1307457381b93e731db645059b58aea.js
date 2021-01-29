@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "eaeb9638dfb4259d4b8f",
-    "url": "/biblewriting/css/app.1e593995.css"
+    "revision": "3862229bbd694f2f0a4d",
+    "url": "/biblewriting/css/app.23a2461b.css"
   },
   {
-    "revision": "d7a85301a3cfbe3515e4",
+    "revision": "fdf288be8d8491da0361",
     "url": "/biblewriting/css/chunk-vendors.3ef6ec65.css"
   },
   {
@@ -12,16 +12,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/biblewriting/img/logo.199b774b.png"
   },
   {
-    "revision": "76c8b16028e83c3a25cb29f3b82b3b16",
+    "revision": "f51fe5d71870d67f3fcd841aa7cdb61a",
     "url": "/biblewriting/index.html"
   },
   {
-    "revision": "eaeb9638dfb4259d4b8f",
-    "url": "/biblewriting/js/app.3b31b26d.js"
+    "revision": "3862229bbd694f2f0a4d",
+    "url": "/biblewriting/js/app.a47858ae.js"
   },
   {
-    "revision": "d7a85301a3cfbe3515e4",
-    "url": "/biblewriting/js/chunk-vendors.9e9466e4.js"
+    "revision": "fdf288be8d8491da0361",
+    "url": "/biblewriting/js/chunk-vendors.48cdc879.js"
   },
   {
     "revision": "f1298c1b0e3eeb271bb9eba9e91f601c",
