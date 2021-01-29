@@ -14,10 +14,10 @@
         </div>
       </div>
     </section>
-    <section class="section">
+    <section class="section" id="body">
       <b-loading :is-full-page="false" v-model="isLoading" />
       <BibleSelector class="screen-only" />
-      <div class="container">
+      <div class="container" id="writebook">
         <div class="content">
           <span class="print-only">
             {{ today }}
@@ -105,6 +105,21 @@ export default class App extends Vue {
   }
   .section {
     padding: 1em !important;
+  }
+
+  #app {
+    height: 100vh;
+  }
+  #body {
+    height: 100%;
+  }
+  #writebook {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  #writebook .page {
+    flex: 1;
   }
 }
 @media screen {
