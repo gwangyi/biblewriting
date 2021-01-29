@@ -323,7 +323,10 @@ export default new Vuex.Store({
         commit("loading", false);
       }
     },
-    async select({ getters, commit, dispatch }, selector: BibleSelector) {
+    async select(
+      { state, getters, commit, dispatch },
+      selector: BibleSelector
+    ) {
       const { verse, ...restSelector } = selector;
       const rangedSelector: BibleRangeSelector = restSelector;
       if (verse) {
@@ -334,15 +337,41 @@ export default new Vuex.Store({
       if (getters.verses === 0) {
         await dispatch("loadChapter");
       }
+      const versePath =
+        state.verseStart === state.verseEnd
+          ? `${state.verseStart}`
+          : `${state.verseStart}/${state.verseEnd}`;
+      const verseTitle =
+        state.verseStart === state.verseEnd
+          ? `${state.verseStart}`
+          : `${state.verseStart}-${state.verseEnd}`;
+      history.pushState(
+        {},
+        `${getters.versionName} ${getters.bookName} ${state.chapter}:${verseTitle}`,
+        `#${state.version}/${state.book}/${state.chapter}/${versePath}`
+      );
     },
     async selectRange(
-      { getters, commit, dispatch },
+      { state, getters, commit, dispatch },
       selector: BibleRangeSelector
     ) {
       commit("select", selector);
       if (getters.verses === 0) {
         await dispatch("loadChapter");
       }
+      const versePath =
+        state.verseStart === state.verseEnd
+          ? `${state.verseStart}`
+          : `${state.verseStart}/${state.verseEnd}`;
+      const verseTitle =
+        state.verseStart === state.verseEnd
+          ? `${state.verseStart}`
+          : `${state.verseStart}-${state.verseEnd}`;
+      history.pushState(
+        {},
+        `${getters.versionName} ${getters.bookName} ${state.chapter}:${verseTitle}`,
+        `#${state.version}/${state.book}/${state.chapter}/${versePath}`
+      );
     }
   },
   modules: {}

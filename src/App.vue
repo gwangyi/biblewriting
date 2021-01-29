@@ -64,10 +64,30 @@ import WriteBook from "./components/WriteBook.vue";
   }
 })
 export default class App extends Vue {
+  private selectViaHash() {
+    const ifNaN = (x, y) => (isNaN(x) ? y : x);
+    const hash = new URL(location.href).hash;
+    const [version, book, _chapter, _verseStart, _verseEnd] = hash
+      .substr(1)
+      .split("/");
+    const chapter = ifNaN(parseInt(_chapter), 1);
+    const verseStart = ifNaN(parseInt(_verseStart), 1);
+    const verseEnd = ifNaN(parseInt(_verseEnd), verseStart);
+
+    return this.$store.dispatch("selectRange", {
+      version,
+      book,
+      chapter,
+      verseStart,
+      verseEnd
+    });
+  }
+
   async created() {
     try {
       await this.$store.dispatch("loadMeta");
-      await this.$store.dispatch("loadChapter");
+      window.addEventListener("hashchange", this.selectViaHash);
+      await this.selectViaHash();
     } catch (e) {
       this.$buefy.toast.open({
         duration: 5000,
@@ -76,6 +96,10 @@ export default class App extends Vue {
         type: "is-danger"
       });
     }
+  }
+
+  async destroyed() {
+    window.removeEventListener("hashchange", this.selectViaHash);
   }
 
   get isLoading() {
