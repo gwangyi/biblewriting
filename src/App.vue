@@ -65,7 +65,7 @@ import WriteBook from "./components/WriteBook.vue";
 })
 export default class App extends Vue {
   private selectViaHash() {
-    const ifNaN = (x, y) => (isNaN(x) ? y : x);
+    const ifNaN = (x: number, y: number) => (isNaN(x) ? y : x);
     const hash = new URL(location.href).hash;
     const [version, book, _chapter, _verseStart, _verseEnd] = hash
       .substr(1)
