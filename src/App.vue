@@ -145,6 +145,9 @@ export default class App extends Vue {
   #writebook .page {
     flex: 1;
   }
+  #writebook .content {
+    margin-bottom: 0;
+  }
 }
 @media screen {
   .print-only {
