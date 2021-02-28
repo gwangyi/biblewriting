@@ -30,8 +30,8 @@ export default class WriteBook extends Vue {
 
     while (min < max) {
       this.glyphPerRow = Math.floor((min + max) / 2);
-      if (min === this.glyphPerRow) break;
       diff = this.page.length - this.glyphPerRow * 0.7;
+      if (min === this.glyphPerRow) break;
       if (diff > 0) {
         min = this.glyphPerRow;
       } else if (diff < 0) {
