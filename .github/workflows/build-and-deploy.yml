@@ -13,6 +13,8 @@ jobs:
           persist-credentials: false
 
       - name: Install and Build 🔧
+        env:
+          VUE_APP_BIBLE_BASE: ${{ secrets.BIBLE_BASE }}
         run: |
           yarn
           yarn build

@@ -5,8 +5,7 @@ import safeEval from "notevil";
 
 Vue.use(Vuex);
 
-const DEFAULT_BIBLE_BASE =
-  "https://ancient-anchorage-57657.herokuapp.com/https://www.bskorea.or.kr/bible";
+const DEFAULT_BIBLE_BASE = "https://www.bskorea.or.kr/bible";
 const bibleBase = process.env.VUE_APP_BIBLE_BASE || DEFAULT_BIBLE_BASE;
 
 export interface CodeMapEntry {
