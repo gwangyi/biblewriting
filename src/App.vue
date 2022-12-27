@@ -128,7 +128,7 @@ export default class App extends Vue {
     display: none !important;
   }
   .section {
-    padding: 1em !important;
+    padding: 1em 3em !important;
   }
 
   #app {
