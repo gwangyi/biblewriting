@@ -91,7 +91,7 @@ export default class App extends Vue {
     } catch (e) {
       this.$buefy.toast.open({
         duration: 5000,
-        message: e.toString(),
+        message: String(e),
         position: "is-bottom",
         type: "is-danger"
       });
