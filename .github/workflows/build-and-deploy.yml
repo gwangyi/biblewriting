@@ -6,9 +6,6 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  BIBLE_BASE: https://www.bskorea.or.kr/bible
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,7 +17,7 @@ jobs:
 
       - name: Install and Build 🔧
         env:
-          VUE_APP_BIBLE_BASE: ${{ env.BIBLE_BASE }}
+          VUE_APP_BIBLE_BASE: ${{ vars.BIBLE_BASE }}
         run: |
           yarn
           yarn build
