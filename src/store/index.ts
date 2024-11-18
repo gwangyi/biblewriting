@@ -2,6 +2,13 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
 import safeEval from "notevil";
+import qs from "qs";
+
+axios.interceptors.request.use(function (config) {
+  config.url =  "https://corsproxy.io/?" + encodeURIComponent(config.url + "?" + qs.stringify(config.params));
+  config.params = null;
+  return config;
+}, function (error) { return Promise.reject(error); })
 
 Vue.use(Vuex);
 
