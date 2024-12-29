@@ -210,7 +210,7 @@ export default new Vuex.Store({
             bible.chapter === state.chapter
         )
         .map(bible => bible.verses);
-      if (verses === undefined) return 0;
+      if (verses === undefined || verses.length == 0) return 0;
       return verses.length;
     },
     verse(state) {
@@ -222,7 +222,7 @@ export default new Vuex.Store({
             bible.chapter === state.chapter
         )
         .map(bible => bible.verses);
-      if (verses === undefined) return "";
+      if (verses === undefined || verses.length == 0) return "";
       return Object.keys([...Array(state.verseEnd - state.verseStart + 1)])
         .map(v => parseInt(v) + state.verseStart)
         .map(v => verses[v - 1].trim())
