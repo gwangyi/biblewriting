@@ -1,18 +1,24 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
-import safeEval from "notevil";
 import qs from "qs";
 
-axios.interceptors.request.use(function (config) {
-  config.url =  "https://corsproxy.io/?" + encodeURIComponent(config.url + "?" + qs.stringify(config.params));
-  config.params = null;
-  return config;
-}, function (error) { return Promise.reject(error); })
+axios.interceptors.request.use(
+  function (config) {
+    config.params = {
+      url: encodeURIComponent(config.url + "?" + qs.stringify(config.params)),
+    };
+    config.url = "https://corsproxy.io/";
+    return config;
+  },
+  function (error) {
+    return Promise.reject(error);
+  },
+);
 
 Vue.use(Vuex);
 
-const DEFAULT_BIBLE_BASE = "https://www.bskorea.or.kr/bible";
+const DEFAULT_BIBLE_BASE = "http://bible.godpia.com";
 const bibleBase = process.env.VUE_APP_BIBLE_BASE || DEFAULT_BIBLE_BASE;
 
 export interface CodeMapEntry {
@@ -63,7 +69,7 @@ export default new Vuex.Store({
     verseEnd: 1,
     versionMeta: [] as VersionMeta[],
     cachedBible: [] as CachedBible[],
-    loading: false
+    loading: false,
   },
   mutations: {
     loading(state, loading: boolean) {
@@ -71,19 +77,19 @@ export default new Vuex.Store({
     },
     loadChapter(state, req: CachedBible) {
       const [book] = state.versionMeta
-        .filter(version => version.code === req.version)
-        .map(version => version.books)
+        .filter((version) => version.code === req.version)
+        .map((version) => version.books)
         .flat()
-        .filter(book => book.code === req.book);
+        .filter((book) => book.code === req.book);
       if (book === undefined) {
         return;
       }
 
       const [bible] = state.cachedBible.filter(
-        bible =>
+        (bible) =>
           bible.version === req.version &&
           bible.book === req.book &&
-          bible.chapter === req.chapter
+          bible.chapter === req.chapter,
       );
       if (bible === undefined) {
         state.cachedBible.push(req);
@@ -105,6 +111,15 @@ export default new Vuex.Store({
       state.verseStart = 1;
       state.verseEnd = 1;
     },
+    updateChapters(state, chapters) {
+      const versionMeta = state.versionMeta.find(
+        (version) => version.code == state.version,
+      );
+      if (versionMeta === undefined) return;
+      versionMeta.books[
+        versionMeta.books.findIndex((book) => book.code == state.book)
+      ].chapters = chapters;
+    },
     select(state, selector: BibleRangeSelector) {
       const newSelector = {
         version: state.version,
@@ -112,10 +127,10 @@ export default new Vuex.Store({
         chapter: state.chapter,
         verseStart: state.verseStart,
         verseEnd: state.verseEnd,
-        ...selector
+        ...selector,
       };
       let version = state.versionMeta.find(
-        ({ code }) => code === newSelector.version
+        ({ code }) => code === newSelector.version,
       );
       if (!version) {
         newSelector.version = state.version;
@@ -137,7 +152,7 @@ export default new Vuex.Store({
           ({ version, book, chapter }) =>
             version === newSelector.version &&
             book === newSelector.book &&
-            chapter === newSelector.chapter
+            chapter === newSelector.chapter,
         )
         .map(({ verses }) => verses.length);
 
@@ -159,171 +174,170 @@ export default new Vuex.Store({
         book: state.book,
         chapter: state.chapter,
         verseStart: state.verseStart,
-        verseEnd: state.verseEnd
+        verseEnd: state.verseEnd,
       } = newSelector);
-    }
+    },
   },
   getters: {
     versions(state) {
-      return state.versionMeta.map(version => ({
+      return state.versionMeta.map((version) => ({
         name: version.name,
-        code: version.code
+        code: version.code,
       }));
     },
     versionName(state) {
       const [name] = state.versionMeta
-        .filter(version => version.code === state.version)
-        .map(version => version.name);
+        .filter((version) => version.code === state.version)
+        .map((version) => version.name);
       return name || "";
     },
     books(state) {
       return state.versionMeta
-        .filter(version => version.code === state.version)
-        .map(version => version.books)
+        .filter((version) => version.code === state.version)
+        .map((version) => version.books)
         .flat()
-        .map(book => ({ name: book.name, code: book.code }));
+        .map((book) => ({ name: book.name, code: book.code }));
     },
     bookName(state) {
       const [name] = state.versionMeta
-        .filter(version => version.code === state.version)
-        .map(version => version.books)
+        .filter((version) => version.code === state.version)
+        .map((version) => version.books)
         .flat()
-        .filter(book => book.code === state.book)
-        .map(book => book.name);
+        .filter((book) => book.code === state.book)
+        .map((book) => book.name);
       return name || "";
     },
     chapters(state) {
       const [chapters] = state.versionMeta
-        .filter(version => version.code === state.version)
-        .map(version => version.books)
+        .filter((version) => version.code === state.version)
+        .map((version) => version.books)
         .flat()
-        .filter(book => book.code === state.book)
-        .map(book => book.chapters);
+        .filter((book) => book.code === state.book)
+        .map((book) => book.chapters);
       return chapters || 0;
     },
     verses(state) {
       const [verses] = state.cachedBible
         .filter(
-          bible =>
+          (bible) =>
             bible.version === state.version &&
             bible.book === state.book &&
-            bible.chapter === state.chapter
+            bible.chapter === state.chapter,
         )
-        .map(bible => bible.verses);
+        .map((bible) => bible.verses);
       if (verses === undefined || verses.length == 0) return 0;
       return verses.length;
     },
     verse(state) {
       const [verses] = state.cachedBible
         .filter(
-          bible =>
+          (bible) =>
             bible.version === state.version &&
             bible.book === state.book &&
-            bible.chapter === state.chapter
+            bible.chapter === state.chapter,
         )
-        .map(bible => bible.verses);
+        .map((bible) => bible.verses);
       if (verses === undefined || verses.length == 0) return "";
       return Object.keys([...Array(state.verseEnd - state.verseStart + 1)])
-        .map(v => parseInt(v) + state.verseStart)
-        .map(v => verses[v - 1].trim())
+        .map((v) => parseInt(v) + state.verseStart)
+        .map((v) => verses[v - 1].trim())
         .join(" ");
-    }
+    },
   },
   actions: {
     async loadMeta({ commit }) {
       commit("loading", true);
       try {
-        const frontPage = await axios.get(bibleBase + "/korbibReadpage.php");
+        const frontPage = await axios.get(bibleBase + "/index.asp");
         const domparser = new DOMParser();
-        const doc = domparser.parseFromString(
+        let doc = domparser.parseFromString(
           frontPage.data,
-          frontPage.headers["content-type"].split(";")[0]
+          frontPage.headers["content-type"].split(";")[0],
         );
-        const versions = (Array.from(
-          doc.querySelectorAll("select#version option")
-        ) as HTMLOptionElement[]).map(option => ({
+        const versions = (
+          Array.from(
+            doc.querySelectorAll("select.vercode option"),
+          ) as HTMLOptionElement[]
+        ).map((option) => ({
           name: option.text,
           code: option.value,
-          books: []
+          books: [],
         }));
 
-        const bibleListJs = await axios.get(bibleBase + "/js/bible.list.js");
-        const bibleMetaRaw: { code: string; books: string[][] }[] = safeEval(
-          bibleListJs.data +
-            "; [" +
-            versions
-              .map(
-                ({ code }) =>
-                  `{code: ${JSON.stringify(code)}, books: sz${code}Book}`
-              )
-              .join(", ") +
-            "]"
+        const readingPage = await axios.get(bibleBase + "/read/reading.asp", {
+          params: { ver: versions[0] },
+        });
+        doc = domparser.parseFromString(
+          readingPage.data,
+          readingPage.headers["content-type"].split(";")[0],
         );
-
-        const buildBibleMeta: (version: string) => BookMeta[] = version => {
-          const rawBooks = bibleMetaRaw.find(({ code }) => code === version);
-          if (rawBooks === undefined) return [];
-
-          return rawBooks.books.map(([meta]) => ({
-            name: meta[0],
-            code: meta[1],
-            chapters: parseInt(meta[meta.length - 1])
-          }));
-        };
+        const bibleMeta: BookMeta[] = (
+          Array.from(
+            doc.querySelectorAll("select#selectBibleSub1 option"),
+          ).concat(
+            Array.from(doc.querySelectorAll("select#selectBibleSub2 option")),
+          ) as HTMLOptionElement[]
+        ).map((option) => ({
+          name: option.text,
+          code: option.value,
+          chapters: 0,
+        }));
 
         commit(
           "loadMeta",
           versions
-            .map(version => ({
+            .map((version) => ({
               ...version,
-              books: buildBibleMeta(version.code)
+              books: bibleMeta,
             }))
-            .filter(version => version.books.length > 0)
+            .filter((version) => version.books.length > 0),
         );
       } finally {
         commit("loading", false);
       }
     },
-    async loadChapter({ state, commit }) {
+    async loadChapter({ state, getters, commit }) {
       commit("loading", true);
       try {
-        const chapterPage = await axios.get(bibleBase + "/korbibReadpage.php", {
+        const chapterPage = await axios.get(bibleBase + "/read/reading.asp", {
           params: {
-            version: state.version,
-            book: state.book,
-            chap: state.chapter
-          }
+            ver: state.version,
+            vol: state.book,
+            chap: state.chapter,
+          },
         });
         const domparser = new DOMParser();
         const doc = domparser.parseFromString(
           chapterPage.data,
-          chapterPage.headers["content-type"].split(";")[0]
+          chapterPage.headers["content-type"].split(";")[0],
         );
+        if (getters.chapters == 0) {
+          commit(
+            "updateChapters",
+            doc.querySelectorAll("select#selectBibleSub3 option").length,
+          );
+        }
         const collectVerse = (node: Node): string => {
           if (node.nodeType === Node.TEXT_NODE)
             return ((node as Text).textContent || "").replaceAll(/\s+/g, " ");
-          if (node.nodeName === "FONT")
-            return Array.from(node.childNodes)
-              .map(n => collectVerse(n))
-              .filter(word => word)
-              .join("");
-          return "";
+          if (node.nodeName === "SPAN") {
+            if ((node as HTMLElement).classList.contains("num")) {
+              return "";
+            }
+          }
+          return Array.from(node.childNodes)
+            .map((n) => collectVerse(n))
+            .filter((word) => word)
+            .join("");
         };
         const verses = Array.from(
-          doc.querySelectorAll("div.bible_read span.number")
-        ).map(elem =>
-          elem.parentNode === null
-            ? ""
-            : Array.from(elem.parentNode.childNodes)
-                .map(node => collectVerse(node))
-                .filter(word => word)
-                .join("")
-        );
+          doc.querySelectorAll("div.bible-cont span.txt"),
+        ).map((elem) => collectVerse(elem));
         commit("loadChapter", {
           version: state.version,
           book: state.book,
           chapter: state.chapter,
-          verses
+          verses,
         });
       } finally {
         commit("loading", false);
@@ -331,7 +345,7 @@ export default new Vuex.Store({
     },
     async select(
       { state, getters, commit, dispatch },
-      selector: BibleSelector
+      selector: BibleSelector,
     ) {
       const { verse, ...restSelector } = selector;
       const rangedSelector: BibleRangeSelector = restSelector;
@@ -354,12 +368,12 @@ export default new Vuex.Store({
       history.pushState(
         {},
         `${getters.versionName} ${getters.bookName} ${state.chapter}:${verseTitle}`,
-        `#${state.version}/${state.book}/${state.chapter}/${versePath}`
+        `#${state.version}/${state.book}/${state.chapter}/${versePath}`,
       );
     },
     async selectRange(
       { state, getters, commit, dispatch },
-      selector: BibleRangeSelector
+      selector: BibleRangeSelector,
     ) {
       commit("select", selector);
       if (getters.verses === 0) {
@@ -376,9 +390,9 @@ export default new Vuex.Store({
       history.pushState(
         {},
         `${getters.versionName} ${getters.bookName} ${state.chapter}:${verseTitle}`,
-        `#${state.version}/${state.book}/${state.chapter}/${versePath}`
+        `#${state.version}/${state.book}/${state.chapter}/${versePath}`,
       );
-    }
+    },
   },
-  modules: {}
+  modules: {},
 });
